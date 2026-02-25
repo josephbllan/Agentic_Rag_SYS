@@ -1,0 +1,9 @@
+from typing import Protocol, List, runtime_checkable
+from ..value_objects import QueryIntent
+
+
+@runtime_checkable
+class IQueryProcessor(Protocol):
+    def process(self, query: str) -> QueryIntent: ...
+    def validate(self, query: str) -> tuple[bool, str]: ...
+    def expand_query(self, query: str) -> List[str]: ...

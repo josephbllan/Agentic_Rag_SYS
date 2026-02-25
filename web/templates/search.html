@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Search: {{ query }} - RAG Search{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <form action="/search" method="get" class="row g-2 mb-4">
+        <div class="col-md-7">
+            <input type="text" name="q" class="form-control" value="{{ query }}" placeholder="Search..." required>
+        </div>
+        <div class="col-md-2">
+            <select name="type" class="form-select">
+                <option value="text" {{ 'selected' if search_type == 'text' }}>Text</option>
+                <option value="hybrid" {{ 'selected' if search_type == 'hybrid' }}>Hybrid</option>
+                <option value="image" {{ 'selected' if search_type == 'image' }}>Image</option>
+            </select>
+        </div>
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i></button>
+        </div>
+    </form>
+
+    <p class="text-muted">Found <strong>{{ results|length }}</strong> results for "<em>{{ query }}</em>" ({{ search_type }} search)</p>
+
+    {% if results %}
+    <div class="row g-3">
+        {% for result in results %}
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-title text-truncate" title="{{ result.get('filename', 'Unknown') }}">
+                        {{ result.get('filename', 'Unknown') }}
+                    </h6>
+                    <span class="badge bg-success score-badge">Score: {{ '%.3f'|format(result.get('similarity_score', 0)) }}</span>
+                    <span class="badge bg-info score-badge">{{ result.get('brand', '') }}</span>
+                    <span class="badge bg-secondary score-badge">{{ result.get('pattern', '') }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-emoji-frown display-1 text-muted"></i>
+        <p class="mt-3 text-muted">No results found. Try a different query.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

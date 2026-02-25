@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}RAG Image Search{% endblock %}
+
+{% block content %}
+<section class="hero text-center">
+    <div class="container">
+        <h1 class="display-5 fw-bold mb-3">Multi-Modal Image Search</h1>
+        <p class="lead mb-4">Search shoe images using text, images, or both</p>
+
+        <form action="/search" method="get" class="row g-2 justify-content-center">
+            <div class="col-md-6">
+                <input type="text" name="q" class="form-control form-control-lg" placeholder="Describe what you're looking for..." required>
+            </div>
+            <div class="col-md-2">
+                <select name="type" class="form-select form-select-lg">
+                    <option value="text">Text</option>
+                    <option value="hybrid">Hybrid</option>
+                    <option value="image">Image</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-light btn-lg w-100"><i class="bi bi-search"></i></button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<div class="container mt-5">
+    <h4 class="mb-3">Filter by Category</h4>
+    <div class="row g-3">
+        {% for category, values in categories.items() %}
+        <div class="col-md-3">
+            <div class="card p-3">
+                <h6 class="text-capitalize fw-bold">{{ category }}</h6>
+                <div class="d-flex flex-wrap gap-1">
+                    {% for val in values %}
+                    <a href="/search?q={{ val }}&type=text" class="badge bg-secondary text-decoration-none">{{ val }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Environment
+.env
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Project-specific generated directories
+vector_db/
+cache/
+embeddings_cache/
+uploads/
+exports/
+static/uploads/
+
+# Logs
+*.log
+logs/
+rag/logs/
+
+# Database files
+*.db
+*.sqlite3
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Model cache (root-level only)
+/models/
+.cache/
+
+# Test/coverage artifacts
+.coverage
+.pytest_cache/
+htmlcov/
+
+# Local-only docs
+Software_Engineering_principles_used.md
