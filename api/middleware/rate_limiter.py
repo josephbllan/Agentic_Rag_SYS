@@ -14,6 +14,9 @@ limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"])
 
 
 def setup_rate_limiter(app: FastAPI) -> None:
+    """Attaches the slowapi rate limiter to the FastAPI application
+    and registers the rate-limit-exceeded exception handler.
+    """
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
     logger.info("Rate limiter configured (200 req/min default)")

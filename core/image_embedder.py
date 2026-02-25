@@ -16,11 +16,15 @@ class ImageEmbedder:
     """Generate embeddings for images using CLIP or ResNet."""
 
     def __init__(self, model_type: str = "clip"):
+        """Initializes the image embedder by selecting and loading the
+        specified model type (CLIP or ResNet)."""
         self.model_type = model_type
         self.device = torch.device(MODEL_CONFIG["clip"]["device"])
         self._load_model()
 
     def _load_model(self):
+        """Dispatches model loading to the appropriate loader based on
+        the configured model type."""
         if self.model_type == "clip":
             self._load_clip()
         elif self.model_type == "resnet":
@@ -29,6 +33,8 @@ class ImageEmbedder:
             raise ValueError(f"Unsupported model type: {self.model_type}")
 
     def _load_clip(self):
+        """Loads the CLIP model and its preprocessing pipeline onto
+        the configured device."""
         model_name = MODEL_CONFIG["clip"]["model_name"]
         self.model, self.preprocess = clip.load(model_name, device=self.device)
         self.model.eval()
@@ -36,6 +42,8 @@ class ImageEmbedder:
         logger.info(f"CLIP model loaded: {model_name}")
 
     def _load_resnet(self):
+        """Loads a pretrained ResNet model and sets up the image
+        preprocessing transforms for inference."""
         model_name = MODEL_CONFIG["resnet"]["model_name"]
         self.model = models.__dict__[model_name](
             pretrained=MODEL_CONFIG["resnet"]["pretrained"]
@@ -53,6 +61,8 @@ class ImageEmbedder:
         logger.info(f"ResNet model loaded: {model_name}")
 
     def encode_image(self, image_path: str) -> np.ndarray:
+        """Encodes a single image file into a normalized embedding vector,
+        returning a zero vector on failure."""
         try:
             image = Image.open(image_path).convert("RGB")
             image = self.preprocess(image).unsqueeze(0).to(self.device)
@@ -72,6 +82,8 @@ class ImageEmbedder:
     def encode_images_batch(
         self, image_paths: List[str], batch_size: int = 32
     ) -> List[np.ndarray]:
+        """Encodes a list of images into embedding vectors by processing
+        them in batches of the specified size."""
         embeddings = []
         for i in range(0, len(image_paths), batch_size):
             for path in image_paths[i : i + batch_size]:
@@ -79,6 +91,8 @@ class ImageEmbedder:
         return embeddings
 
     def encode_text(self, text: str) -> np.ndarray:
+        """Encodes a text string into an embedding vector using the CLIP
+        text encoder; raises an error for non-CLIP model types."""
         if self.model_type != "clip":
             raise ValueError("Text encoding only available for CLIP model")
         try:

@@ -16,6 +16,7 @@ class ChromaVectorDB(BaseVectorDB):
     """ChromaDB-backed vector database."""
 
     def __init__(self, dimension: int, collection_name: str = "shoe_images"):
+        """Initializes the ChromaDB client and ensures the target collection exists."""
         super().__init__(dimension, collection_name)
         self._client = chromadb.Client(
             Settings(persist_directory=str(VECTOR_DB_DIR / "chroma_db"))
@@ -23,6 +24,8 @@ class ChromaVectorDB(BaseVectorDB):
         self._ensure_collection()
 
     def _ensure_collection(self) -> None:
+        """Retrieves an existing ChromaDB collection or creates a new one
+        if it does not already exist."""
         try:
             self.collection = self._client.get_collection(self._collection_name)
         except ValueError:
@@ -35,20 +38,27 @@ class ChromaVectorDB(BaseVectorDB):
         self, vectors: np.ndarray, metadata: List[Dict[str, Any]],
         ids: Optional[List[str]] = None,
     ) -> None:
+        """Adds embedding vectors along with their metadata and optional IDs
+        to the ChromaDB collection."""
         if ids is None:
             ids = [f"item_{i}" for i in range(len(vectors))]
         self.collection.add(embeddings=vectors.tolist(), metadatas=metadata, ids=ids)
 
     def update_metadata(self, vector_id: str, metadata: Dict[str, Any]) -> None:
+        """Updates the metadata associated with a specific vector ID
+        in the ChromaDB collection."""
         self.collection.update(ids=[vector_id], metadatas=[metadata])
 
     def delete_vector(self, vector_id: str) -> None:
+        """Removes a vector entry from the ChromaDB collection by its ID."""
         self.collection.delete(ids=[vector_id])
 
     def search(
         self, query_vector: np.ndarray, k: int = 10,
         filters: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
+        """Queries the ChromaDB collection for the top-k nearest vectors,
+        optionally applying metadata filters, and returns ranked results."""
         where_clause: Dict[str, Any] = {}
         if filters:
             for key, value in filters.items():
@@ -70,12 +80,16 @@ class ChromaVectorDB(BaseVectorDB):
         return formatted
 
     def get_vector_by_id(self, vector_id: str) -> Optional[np.ndarray]:
+        """Retrieves the raw embedding vector for a given ID, or returns None
+        if the ID does not exist in the collection."""
         result = self.collection.get(ids=[vector_id])
         if result["embeddings"]:
             return np.array(result["embeddings"][0])
         return None
 
     def get_stats(self) -> Dict[str, Any]:
+        """Returns a dictionary of database statistics including the backend name,
+        total vector count, and collection name."""
         return {
             "backend": "chroma",
             "total_vectors": self.collection.count(),
@@ -83,9 +97,12 @@ class ChromaVectorDB(BaseVectorDB):
         }
 
     def rebuild_index(self) -> None:
+        """Performs a no-op since ChromaDB automatically manages its own index."""
         logger.warning("ChromaDB manages its own index; rebuild is a no-op")
 
     def clear_database(self) -> None:
+        """Deletes the current collection and recreates an empty one
+        with the same name and distance metric configuration."""
         self._client.delete_collection(self._collection_name)
         self.collection = self._client.create_collection(
             name=self._collection_name,

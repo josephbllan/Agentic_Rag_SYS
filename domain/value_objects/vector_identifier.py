@@ -9,10 +9,12 @@ class VectorIdentifier:
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
     def __post_init__(self):
+        """Validates that both the id and collection strings are non-empty."""
         if not self.id or not self.id.strip():
             raise ValueError("ID cannot be empty")
         if not self.collection or not self.collection.strip():
             raise ValueError("Collection cannot be empty")
 
     def to_string(self) -> str:
+        """Returns the vector identifier as a formatted collection:id string."""
         return f"{self.collection}:{self.id}"

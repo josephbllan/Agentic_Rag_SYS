@@ -20,12 +20,14 @@ class ImageMetadata(BaseModel):
 
     @validator('filename')
     def validate_filename(cls, v: str) -> str:
+        """Validates that the filename is not empty or whitespace, and strips leading/trailing spaces."""
         if not v or v.isspace():
             raise ValueError('Filename cannot be empty or whitespace')
         return v.strip()
 
     @validator('image_width', 'image_height')
     def validate_dimensions(cls, v: Optional[int]) -> Optional[int]:
+        """Validates that image dimensions fall within the acceptable range of 0 to 10000."""
         if v is not None and (v < 0 or v > 10000):
             raise ValueError('Image dimensions must be between 0 and 10000')
         return v

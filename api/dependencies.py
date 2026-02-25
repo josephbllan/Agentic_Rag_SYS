@@ -16,6 +16,9 @@ _query_processor_instance: Optional[QueryProcessor] = None
 
 
 def get_vector_db() -> BaseVectorDB:
+    """Returns the singleton vector database instance, creating it
+    lazily with double-checked locking on first access.
+    """
     global _vector_db_instance
     if _vector_db_instance is None:
         with _lock:
@@ -25,6 +28,9 @@ def get_vector_db() -> BaseVectorDB:
 
 
 def get_search_engine() -> SearchEngine:
+    """Returns the singleton search engine instance, initializing it
+    with the vector database on first access using double-checked locking.
+    """
     global _search_engine_instance
     if _search_engine_instance is None:
         with _lock:
@@ -34,6 +40,9 @@ def get_search_engine() -> SearchEngine:
 
 
 def get_query_processor() -> QueryProcessor:
+    """Returns the singleton query processor instance, creating it
+    lazily with thread-safe double-checked locking.
+    """
     global _query_processor_instance
     if _query_processor_instance is None:
         with _lock:

@@ -13,6 +13,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    """Generates a signed JWT access token from the given payload,
+    applying the specified or default expiration delta.
+    """
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=JWT_CONFIG["access_token_expire_minutes"]))
     to_encode.update({"exp": expire})
@@ -20,17 +23,26 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
 
 
 def get_user(username: str) -> Optional[UserInDB]:
+    """Looks up a user by username in the demo user store and returns
+    a UserInDB instance, or None if the user does not exist.
+    """
     if username in DEMO_USERS:
         return UserInDB(**DEMO_USERS[username])
     return None
 
 
 def authenticate_user(username: str, password: str) -> Optional[UserInDB]:
+    """Validates the given credentials against the stored user record
+    and returns the user if authentication succeeds, or None otherwise.
+    """
     user = get_user(username)
     return user if user and verify_password(password, user.hashed_password) else None
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
+    """Decodes and validates the JWT bearer token, checks the blacklist,
+    and returns the corresponding User or raises a 401 error.
+    """
     if blacklist.is_revoked(token):
         raise HTTPException(status_code=401, detail="Token has been revoked")
     try:
@@ -47,6 +59,9 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
 
 
 async def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
+    """Ensures the authenticated user account is active, raising a
+    400 error if the user has been disabled.
+    """
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user

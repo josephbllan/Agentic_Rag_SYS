@@ -17,4 +17,7 @@ class SearchResult(Base):
     created_at = Column(DateTime, default=_utcnow)
 
     def __repr__(self):
+        """Returns a string representation of the SearchResult instance.
+        Displays the query ID, image ID, and similarity score.
+        """
         return f"<SearchResult(id={self.id}, query_id={self.query_id}, image_id={self.image_id}, score={self.similarity_score})>"

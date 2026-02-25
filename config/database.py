@@ -14,19 +14,31 @@ __all__ = [
 
 
 def create_tables():
+    """Creates all database tables defined in the SQLAlchemy models.
+    Uses the Base metadata and the configured engine binding.
+    """
     Base.metadata.create_all(bind=engine)
 
 
 def drop_tables():
+    """Drops all database tables defined in the SQLAlchemy models.
+    Removes every table tracked by Base metadata from the database.
+    """
     Base.metadata.drop_all(bind=engine)
 
 
 def reset_database():
+    """Resets the database by dropping and recreating all tables.
+    Destroys all existing data and rebuilds the schema from scratch.
+    """
     drop_tables()
     create_tables()
 
 
 def test_connection():
+    """Tests the database connection by executing a simple query.
+    Returns True if the connection succeeds, False otherwise.
+    """
     try:
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))

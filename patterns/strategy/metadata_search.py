@@ -6,9 +6,13 @@ from domain.base_classes import BaseSearchStrategy
 
 class MetadataSearchStrategy(BaseSearchStrategy):
     def __init__(self):
+        """Initializes the metadata search strategy with its strategy name."""
         super().__init__(name="metadata_search")
 
     def execute(self, query: SearchQuery, context: Dict[str, Any]) -> List[SearchResultItem]:
+        """Executes a metadata-based search using the provided filter criteria
+        with a zero vector to retrieve filtered results from the database.
+        """
         vector_db = context.get("vector_db")
         if not vector_db:
             raise ValueError("Missing required dependencies in context")
@@ -21,6 +25,7 @@ class MetadataSearchStrategy(BaseSearchStrategy):
         return final
 
     def validate_query(self, query: SearchQuery) -> tuple[bool, str]:
+        """Validates that the query contains filter criteria required for metadata search."""
         if not query.filters:
             return False, "Filters are required for metadata search"
         return True, "Valid"

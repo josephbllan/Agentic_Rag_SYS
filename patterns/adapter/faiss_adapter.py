@@ -7,6 +7,9 @@ from domain.base_classes import BaseVectorDatabase
 
 class FAISSAdapter(BaseVectorDatabase):
     def __init__(self, dimension: int, collection_name: str = "default"):
+        """Initializes the FAISS adapter with the specified dimension and collection name.
+        Creates a flat L2 index for exact nearest-neighbor search.
+        """
         super().__init__(dimension, collection_name)
         import faiss
         import numpy as np
@@ -17,10 +20,16 @@ class FAISSAdapter(BaseVectorDatabase):
         self._is_initialized = True
 
     def add_vectors(self, vectors: VectorType, metadata: List[Dict[str, Any]], ids: Optional[List[str]] = None) -> None:
+        """Adds vectors and their associated metadata to the FAISS index.
+        Vectors are cast to float32 before insertion.
+        """
         self._index.add(vectors.astype("float32"))
         self._metadata.extend(metadata)
 
     def search(self, query_vector: VectorType, k: int = 10, filters: Optional[Dict[str, Any]] = None) -> List[SearchResultItem]:
+        """Searches the FAISS index for the k nearest neighbors of the query vector.
+        Returns a list of SearchResultItem objects with inverse-distance similarity scores.
+        """
         distances, indices = self._index.search(query_vector.reshape(1, -1).astype("float32"), k)
         results = []
         for i, (distance, idx) in enumerate(zip(distances[0], indices[0])):
@@ -37,10 +46,16 @@ class FAISSAdapter(BaseVectorDatabase):
         return results
 
     def delete_vector(self, vector_id: str) -> None:
+        """Marks a vector as deleted in the metadata store by setting a deletion flag.
+        Does not remove the vector from the underlying FAISS index.
+        """
         for meta in self._metadata:
             if meta.get("vector_id") == vector_id:
                 meta["_deleted"] = True
                 break
 
     def get_stats(self) -> Dict[str, Any]:
+        """Returns statistics about the FAISS index including total vectors,
+        dimension, and backend identifier.
+        """
         return {"total_vectors": self._index.ntotal, "dimension": self._dimension, "backend": "faiss"}

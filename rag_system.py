@@ -16,6 +16,9 @@ class RAGSystem:
     """Main RAG System orchestrator."""
 
     def __init__(self, vector_backend: str = "faiss"):
+        """Initializes the RAG system with the specified vector backend
+        and triggers full system setup.
+        """
         self.vector_backend = vector_backend
         self.search_engine = None
         self.embedding_manager = None
@@ -23,6 +26,9 @@ class RAGSystem:
         self._initialize_system()
 
     def _initialize_system(self):
+        """Connects to the database, creates tables, and instantiates
+        the search engine, embedding manager, and query processor.
+        """
         logger.info("Initializing RAG System...")
         if not test_connection():
             raise RuntimeError("Database connection failed")
@@ -33,6 +39,9 @@ class RAGSystem:
         logger.info("RAG System initialized successfully!")
 
     def index_images(self, image_directory: Optional[str] = None, batch_size: int = 32) -> Dict[str, Any]:
+        """Discovers image files in the given directory and indexes them
+        into the vector database in batches, returning a summary dict.
+        """
         try:
             image_directory = image_directory or str(DATA_DIR)
             image_paths = self._find_image_files(image_directory)
@@ -58,6 +67,9 @@ class RAGSystem:
             return {"status": "failed", "error": str(e)}
 
     def search(self, query: str, search_type: str = "text", **kwargs) -> List[Dict[str, Any]]:
+        """Dispatches a search request to the appropriate engine method
+        based on the specified search type (text, image, hybrid, semantic, or natural).
+        """
         try:
             dispatch = {
                 "text": lambda: self.search_engine.text_to_image_search(query, **kwargs),
@@ -79,6 +91,9 @@ class RAGSystem:
             return []
 
     def get_recommendations(self, image_path: str, limit: int = 10) -> List[Dict[str, Any]]:
+        """Returns visually similar image recommendations for the
+        given image path, delegating to the search engine.
+        """
         try:
             return self.search_engine.get_recommendations(image_path, limit)
         except Exception as e:
@@ -86,6 +101,9 @@ class RAGSystem:
             return []
 
     def get_stats(self) -> Dict[str, Any]:
+        """Aggregates and returns statistics from the search engine,
+        vector database, and system configuration.
+        """
         try:
             return {
                 "search_engine": self.search_engine.get_search_stats(),
@@ -97,6 +115,9 @@ class RAGSystem:
             return {"error": str(e)}
 
     def _find_image_files(self, directory: str) -> List[str]:
+        """Recursively scans the directory for supported image formats
+        and returns a sorted list of file paths.
+        """
         d = Path(directory)
         if not d.exists():
             return []
@@ -106,6 +127,9 @@ class RAGSystem:
         return sorted(paths)
 
     def _extract_metadata_from_path(self, image_path: str) -> Dict[str, Any]:
+        """Parses the image filename to extract structured metadata
+        such as pattern, shape, size, and brand.
+        """
         p = Path(image_path)
         parts = p.stem.split("_")
         meta: Dict[str, Any] = {"filename": p.name, "original_path": str(image_path), "pattern": "other", "shape": "other", "size": "medium", "brand": "other"}

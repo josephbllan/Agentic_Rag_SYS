@@ -5,9 +5,13 @@ from domain.base_classes import BaseSearchStrategy
 
 class SemanticSearchStrategy(BaseSearchStrategy):
     def __init__(self):
+        """Initializes the semantic search strategy with its strategy name."""
         super().__init__(name="semantic_search")
 
     def execute(self, query: SearchQuery, context: Dict[str, Any]) -> List[SearchResultItem]:
+        """Executes a semantic search with query expansion and similarity boosting
+        for results that match multiple expanded query terms.
+        """
         em = context.get("embedding_manager")
         vdb = context.get("vector_db")
         qp = context.get("query_processor")
@@ -32,6 +36,7 @@ class SemanticSearchStrategy(BaseSearchStrategy):
         return final
 
     def validate_query(self, query: SearchQuery) -> tuple[bool, str]:
+        """Validates that the query contains a non-empty text string."""
         if not query.query or not query.query.strip():
             return False, "Query is empty"
         return True, "Valid"

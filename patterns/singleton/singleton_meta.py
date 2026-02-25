@@ -7,6 +7,9 @@ class SingletonMeta(type):
     _lock: Lock = Lock()
 
     def __call__(cls, *args, **kwargs):
+        """Controls instance creation to ensure only one instance exists per class.
+        Uses double-checked locking for thread safety.
+        """
         if cls not in cls._instances:
             with cls._lock:
                 if cls not in cls._instances:

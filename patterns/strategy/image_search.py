@@ -6,9 +6,13 @@ from domain.base_classes import BaseSearchStrategy
 
 class ImageSearchStrategy(BaseSearchStrategy):
     def __init__(self):
+        """Initializes the image search strategy with its strategy name."""
         super().__init__(name="image_search")
 
     def execute(self, query: SearchQuery, context: Dict[str, Any]) -> List[SearchResultItem]:
+        """Executes an image-based search using CLIP embeddings of the query image
+        against the vector database.
+        """
         em = context.get("embedding_manager")
         vdb = context.get("vector_db")
         if not em or not vdb:
@@ -22,6 +26,7 @@ class ImageSearchStrategy(BaseSearchStrategy):
         return results
 
     def validate_query(self, query: SearchQuery) -> tuple[bool, str]:
+        """Validates that the query contains a valid, existing image file path."""
         if not query.image_path:
             return False, "Image path is required"
         if not os.path.exists(query.image_path):

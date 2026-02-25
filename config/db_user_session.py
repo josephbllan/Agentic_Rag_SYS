@@ -20,4 +20,7 @@ class UserSession(Base):
     ended_at = Column(DateTime)
 
     def __repr__(self):
+        """Returns a string representation of the UserSession instance.
+        Displays the session ID and total search count.
+        """
         return f"<UserSession(id={self.id}, session_id='{self.session_id}', searches={self.total_searches})>"

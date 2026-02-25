@@ -15,6 +15,9 @@ if not hasattr(_bcrypt, "__about__"):
 _original_hashpw = _bcrypt.hashpw
 
 def _patched_hashpw(password: bytes, salt: bytes) -> bytes:
+    """Wraps bcrypt's hashpw to silently truncate passwords exceeding
+    72 bytes, maintaining compatibility with bcrypt 4.2+ strict checks.
+    """
     if isinstance(password, bytes) and len(password) > 72:
         password = password[:72]
     return _original_hashpw(password, salt)
@@ -27,8 +30,14 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verifies a plain-text password against its bcrypt hash
+    and returns True if the credentials match.
+    """
     return pwd_context.verify(plain_password, hashed_password)
 
 
 def get_password_hash(password: str) -> str:
+    """Hashes a plain-text password using bcrypt and returns
+    the resulting hash string for secure storage.
+    """
     return pwd_context.hash(password)

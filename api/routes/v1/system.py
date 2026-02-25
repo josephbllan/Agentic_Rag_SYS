@@ -14,6 +14,9 @@ router = APIRouter()
 
 
 def get_health_controller() -> HealthController:
+    """Creates and returns a new HealthController instance
+    to serve as a FastAPI dependency for health-check endpoints.
+    """
     return HealthController()
 
 

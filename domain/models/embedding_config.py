@@ -11,6 +11,7 @@ class EmbeddingConfig(BaseModel):
 
     @validator('device')
     def validate_device(cls, v: str) -> str:
+        """Validates that the device string is one of the supported compute devices."""
         if v not in ['cpu', 'cuda', 'mps']:
             raise ValueError('Device must be cpu, cuda, or mps')
         return v

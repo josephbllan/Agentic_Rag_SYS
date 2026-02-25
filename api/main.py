@@ -24,6 +24,9 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Manages the application lifespan by logging startup and shutdown
+    events for the RAG Image Search API.
+    """
     logger.info("=" * 60)
     logger.info("RAG Image Search API Starting...")
     logger.info("Version: %s", APP_VERSION)
@@ -33,6 +36,9 @@ async def lifespan(app: FastAPI):
 
 
 def create_app() -> FastAPI:
+    """Creates and configures the FastAPI application with CORS,
+    middleware, error handlers, rate limiting, and API routes.
+    """
     app = FastAPI(
         title="RAG Image Search API",
         description="Multi-modal image search system",

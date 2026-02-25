@@ -18,6 +18,9 @@ class IndexingService(BaseService):
         vector_db: Optional[IVectorDatabase] = None,
         event_publisher: Optional[EventPublisher] = None,
     ):
+        """Initializes the indexing service with optional embedding model,
+        vector database, and event publisher dependencies.
+        """
         super().__init__("IndexingService")
         self._embedding_model = embedding_model
         self._vector_db = vector_db
@@ -28,6 +31,9 @@ class IndexingService(BaseService):
     def index_directory(
         self, directory_path: str, batch_size: int = 32, recursive: bool = True
     ) -> IndexingResult:
+        """Scans the given directory for images and indexes them in batches,
+        publishing progress events and returning an IndexingResult summary.
+        """
         self._ensure_initialized()
         dir_path = Path(directory_path)
         if not dir_path.exists():
@@ -73,6 +79,9 @@ class IndexingService(BaseService):
         )
 
     def _index_single_image(self, image_path: Path) -> None:
+        """Generates an embedding for a single image and stores it
+        along with extracted metadata in the vector database.
+        """
         if not self._embedding_model or not self._vector_db:
             raise RuntimeError("Embedding model and vector DB required")
         embedding = self._embedding_model.encode(str(image_path))
@@ -82,6 +91,9 @@ class IndexingService(BaseService):
         )
 
     def _find_images(self, directory: Path, recursive: bool) -> List[Path]:
+        """Collects image file paths from the directory, optionally
+        searching recursively, and returns them sorted.
+        """
         exts = {".jpg", ".jpeg", ".png", ".bmp", ".tiff"}
         files: List[Path] = []
         for ext in exts:
@@ -89,9 +101,13 @@ class IndexingService(BaseService):
         return sorted(files)
 
     def _extract_metadata(self, image_path: Path) -> ImageMetadata:
+        """Creates an ImageMetadata instance from the given image path."""
         return ImageMetadata(filename=image_path.name, original_path=str(image_path))
 
     def get_statistics(self) -> Dict[str, Any]:
+        """Computes and returns indexing statistics including totals,
+        success rate, and current service status.
+        """
         total = self._total_indexed + self._total_failed
         return {
             "total_indexed": self._total_indexed,

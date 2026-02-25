@@ -30,11 +30,15 @@ app.register_blueprint(api_bp)
 
 @app.route("/")
 def index():
+    """Renders the main landing page with available metadata categories."""
     return render_template("index.html", categories=METADATA_CATEGORIES)
 
 
 @app.route("/search")
 def search():
+    """Executes a search based on query parameters and renders
+    the results page with matching images.
+    """
     query = request.args.get("q", "")
     search_type = request.args.get("type", "text")
     if not query:
@@ -51,6 +55,9 @@ def search():
 
 @app.route("/browse")
 def browse():
+    """Queries the database for stored shoe images and renders
+    the browse gallery page.
+    """
     try:
         from config.database import get_db_session, ShoeImage
         with get_db_session() as db:
@@ -63,6 +70,7 @@ def browse():
 
 @app.route("/image/<path:filename>")
 def serve_image(filename):
+    """Serves an uploaded image file from the uploads directory."""
     try:
         return send_file(os.path.join(app.config["UPLOAD_FOLDER"], secure_filename(filename)))
     except Exception:
@@ -71,6 +79,7 @@ def serve_image(filename):
 
 @app.route("/analytics")
 def analytics():
+    """Renders the analytics dashboard with current search engine statistics."""
     try:
         return render_template("analytics.html", stats=search_engine.get_search_stats())
     except Exception as e:
@@ -79,11 +88,13 @@ def analytics():
 
 @app.errorhandler(404)
 def not_found(error):
+    """Handles 404 errors by rendering the error page with a not-found message."""
     return render_template("error.html", error="Page not found"), 404
 
 
 @app.errorhandler(500)
 def internal_error(error):
+    """Handles 500 errors by rendering the error page with a server-error message."""
     return render_template("error.html", error="Internal server error"), 500
 
 

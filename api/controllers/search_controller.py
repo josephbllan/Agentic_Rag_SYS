@@ -183,5 +183,8 @@ class SearchController(BaseController):
             raise
     
     def __repr__(self) -> str:
+        """Returns a string representation of the search controller
+        including the underlying search engine instance.
+        """
         return f"SearchController(engine={self._search_engine})"
 

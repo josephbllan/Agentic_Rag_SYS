@@ -18,6 +18,9 @@ query_processor = QueryProcessor()
 
 @api_bp.route("/api/search", methods=["POST"])
 def api_search():
+    """Handles POST requests for text, image, hybrid, or semantic
+    searches and returns matching results as JSON.
+    """
     try:
         data = request.get_json()
         query = data.get("query", "")
@@ -43,6 +46,9 @@ def api_search():
 
 @api_bp.route("/api/upload", methods=["POST"])
 def api_upload():
+    """Accepts a file upload via POST, validates its type,
+    saves it to the uploads folder, and returns the file URL.
+    """
     try:
         if "file" not in request.files:
             return jsonify({"error": "No file provided"}), 400
@@ -65,6 +71,9 @@ def api_upload():
 
 @api_bp.route("/api/similar", methods=["POST"])
 def api_similar():
+    """Finds and returns images visually similar to the one
+    identified by the provided image path.
+    """
     try:
         data = request.get_json()
         image_path = data.get("image_path", "")
@@ -79,6 +88,9 @@ def api_similar():
 
 @api_bp.route("/api/recommendations", methods=["POST"])
 def api_recommendations():
+    """Generates product recommendations based on the given
+    reference image and returns them as JSON.
+    """
     try:
         data = request.get_json()
         image_path = data.get("image_path", "")
@@ -93,6 +105,9 @@ def api_recommendations():
 
 @api_bp.route("/api/natural", methods=["POST"])
 def api_natural():
+    """Processes a natural language query, extracts intent and filters,
+    and routes to the appropriate search method.
+    """
     try:
         data = request.get_json()
         query = data.get("query", "")
@@ -121,6 +136,7 @@ def api_natural():
 
 @api_bp.route("/api/stats")
 def api_stats():
+    """Returns the current search engine statistics as JSON."""
     try:
         return jsonify(search_engine.get_search_stats())
     except Exception as e:
@@ -129,5 +145,6 @@ def api_stats():
 
 @api_bp.route("/api/categories")
 def api_categories():
+    """Returns the available metadata categories (brands, patterns, etc.) as JSON."""
     from config.settings import METADATA_CATEGORIES
     return jsonify(METADATA_CATEGORIES)

@@ -19,4 +19,7 @@ class SearchQuery(Base):
     created_at = Column(DateTime, default=_utcnow)
 
     def __repr__(self):
+        """Returns a string representation of the SearchQuery instance.
+        Truncates the query text to 50 characters for readability.
+        """
         return f"<SearchQuery(id={self.id}, query='{self.query_text[:50]}...', type='{self.query_type}')>"

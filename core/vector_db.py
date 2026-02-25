@@ -12,6 +12,8 @@ VectorDatabase = BaseVectorDB
 def create_vector_db(
     backend: str = "faiss", collection_name: str = "shoe_images"
 ) -> BaseVectorDB:
+    """Creates and returns a vector database instance for the specified
+    backend (FAISS or ChromaDB) with the CLIP embedding dimension."""
     dim = MODEL_CONFIG["clip"].get("dimension", 512)
     if backend == "faiss":
         return FAISSVectorDB(dimension=dim, collection_name=collection_name)
@@ -21,6 +23,8 @@ def create_vector_db(
 
 
 def get_embedding_dimension(model_name: str) -> int:
+    """Returns the output embedding dimension for a given model name,
+    defaulting to 512 if the model is not recognized."""
     dimensions = {
         "ViT-B/32": 512, "ViT-L/14": 768,
         "resnet50": 2048, "all-MiniLM-L6-v2": 384,
@@ -29,6 +33,8 @@ def get_embedding_dimension(model_name: str) -> int:
 
 
 def validate_vector(vector: np.ndarray, expected_dim: int) -> bool:
+    """Checks whether a vector's last dimension matches the expected
+    embedding dimension."""
     return vector.shape[-1] == expected_dim
 
 

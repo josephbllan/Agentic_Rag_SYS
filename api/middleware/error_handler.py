@@ -14,10 +14,16 @@ logger = logging.getLogger(__name__)
 
 
 def _request_id(request: Request) -> str:
+    """Extracts the request ID from the request state, falling back
+    to 'unknown' if no ID has been assigned.
+    """
     return getattr(request.state, "request_id", "unknown")
 
 
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Handles request validation errors by returning a 422 JSON response
+    with error details in debug mode or a generic message in production.
+    """
     rid = _request_id(request)
     logger.warning(f"[{rid}] Validation error: {exc.errors()}")
 
@@ -36,6 +42,9 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    """Handles HTTP exceptions by returning a standardized JSON error
+    response containing the status code and detail message.
+    """
     rid = _request_id(request)
     logger.warning(f"[{rid}] HTTP exception: {exc.status_code} - {exc.detail}")
 
@@ -54,6 +63,9 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 
 
 async def general_exception_handler(request: Request, exc: Exception):
+    """Catches all unhandled exceptions and returns a 500 JSON response,
+    exposing the error message only when debug mode is enabled.
+    """
     rid = _request_id(request)
     logger.error(f"[{rid}] Unhandled exception: {exc}", exc_info=True)
 
@@ -71,6 +83,9 @@ async def general_exception_handler(request: Request, exc: Exception):
 
 
 def setup_error_handlers(app: FastAPI):
+    """Registers all global exception handlers on the FastAPI application
+    for validation errors, HTTP exceptions, and unhandled exceptions.
+    """
     app.add_exception_handler(RequestValidationError, validation_exception_handler)
     app.add_exception_handler(StarletteHTTPException, http_exception_handler)
     app.add_exception_handler(Exception, general_exception_handler)

@@ -20,6 +20,9 @@ router = APIRouter()
 def get_search_controller(
     search_engine=Depends(get_search_engine),
 ) -> SearchController:
+    """Creates a SearchController instance injected with the singleton
+    search engine, serving as a FastAPI dependency provider.
+    """
     return SearchController(search_engine)
 
 
@@ -31,6 +34,9 @@ async def text_search(
     controller: SearchController = Depends(get_search_controller),
     current_user: User = Depends(get_current_active_user),
 ):
+    """Performs a text-to-image search using the provided query string
+    and returns matching results filtered by similarity threshold.
+    """
     try:
         result = await controller.text_search(
             query=body.query,
@@ -51,6 +57,9 @@ async def image_search(
     controller: SearchController = Depends(get_search_controller),
     current_user: User = Depends(get_current_active_user),
 ):
+    """Performs an image-to-image similarity search using the provided
+    image path and returns matching results above the similarity threshold.
+    """
     try:
         result = await controller.image_search(
             image_path=body.image_path,
@@ -71,6 +80,9 @@ async def hybrid_search(
     controller: SearchController = Depends(get_search_controller),
     current_user: User = Depends(get_current_active_user),
 ):
+    """Performs a hybrid search combining text and image queries,
+    delegating to the search controller for fused result ranking.
+    """
     try:
         result = await controller.hybrid_search(
             query=body.query,

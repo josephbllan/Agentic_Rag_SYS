@@ -14,6 +14,8 @@ def log_search_query(
     filters: Optional[Dict[str, Any]],
     result_count: int,
 ) -> None:
+    """Persists a search query record to the database, silently logging
+    any errors that occur during the write."""
     try:
         with get_db_session() as db:
             db.add(SearchQuery(
@@ -28,6 +30,8 @@ def log_search_query(
 
 
 def get_search_stats(vector_db) -> Dict[str, Any]:
+    """Aggregates statistics from the most recent search queries and
+    combines them with vector database stats."""
     try:
         with get_db_session() as db:
             recent = (

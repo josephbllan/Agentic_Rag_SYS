@@ -6,11 +6,13 @@ from .subject import Subject
 
 class IndexingEventObserver(Observer):
     def __init__(self):
+        """Initializes the indexing event observer with indexed and failed counters set to zero."""
         self._logger = logging.getLogger(self.__class__.__name__)
         self._indexed_count = 0
         self._failed_count = 0
 
     def update(self, subject: Subject, event_type: str, data: Dict[str, Any]) -> None:
+        """Processes indexing-related events and logs progress milestones or failures."""
         if event_type == "image_indexed":
             self._indexed_count += 1
             if self._indexed_count % 100 == 0:
@@ -23,4 +25,5 @@ class IndexingEventObserver(Observer):
 
     @property
     def stats(self) -> Dict[str, int]:
+        """Returns a dictionary containing the total indexed and failed counts."""
         return {"indexed": self._indexed_count, "failed": self._failed_count}

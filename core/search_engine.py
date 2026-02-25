@@ -24,6 +24,8 @@ class SearchEngine:
         *,
         vector_backend: str = "faiss",
     ):
+        """Initializes the search engine with injected or default dependencies
+        for the vector database, embedding manager, and multimodal embedder."""
         self.vector_db = vector_db or create_vector_db(vector_backend)
         self.embedding_manager = embedding_manager or EmbeddingManager()
         self.multimodal_embedder = multimodal_embedder or MultiModalEmbedder()
@@ -35,6 +37,8 @@ class SearchEngine:
         self, query: str, filters: Optional[Dict[str, Any]] = None,
         limit: Optional[int] = None,
     ) -> List[Dict[str, Any]]:
+        """Searches for images matching a text query by encoding it with CLIP
+        and querying the vector database."""
         try:
             emb = self.embedding_manager.get_text_embedding(query, "clip")
             limit = limit or self.max_results
@@ -50,6 +54,8 @@ class SearchEngine:
         self, image_path: str, filters: Optional[Dict[str, Any]] = None,
         limit: Optional[int] = None,
     ) -> List[Dict[str, Any]]:
+        """Finds visually similar images by encoding the input image with CLIP
+        and searching the vector database."""
         try:
             emb = self.embedding_manager.get_image_embedding(image_path, "clip")
             limit = limit or self.max_results
@@ -64,6 +70,8 @@ class SearchEngine:
     def metadata_search(
         self, filters: Dict[str, Any], limit: Optional[int] = None,
     ) -> List[Dict[str, Any]]:
+        """Performs a metadata-only search using a zero vector, relying
+        entirely on filter criteria to select results."""
         try:
             limit = limit or self.max_results
             results = self.vector_db.search(np.zeros(512), k=1000, filters=filters)
@@ -78,6 +86,8 @@ class SearchEngine:
         self, query: Optional[str] = None, image_path: Optional[str] = None,
         filters: Optional[Dict[str, Any]] = None, limit: Optional[int] = None,
     ) -> List[Dict[str, Any]]:
+        """Combines text, image, and metadata search results using weighted
+        scoring to produce a unified ranked list."""
         try:
             limit = limit or self.max_results
             all_results: Dict[Any, Dict[str, Any]] = {}
@@ -112,6 +122,8 @@ class SearchEngine:
         self, query: str, filters: Optional[Dict[str, Any]] = None,
         limit: Optional[int] = None,
     ) -> List[Dict[str, Any]]:
+        """Performs semantic search by expanding the query into variations
+        and boosting results that match multiple expansions."""
         try:
             expanded = self._expand_query(query)
             all_results: Dict[Any, Dict[str, Any]] = {}
@@ -134,6 +146,8 @@ class SearchEngine:
             return []
 
     def get_recommendations(self, image_path: str, limit: int = 10) -> List[Dict[str, Any]]:
+        """Returns visually similar image recommendations, excluding the
+        source image itself from the results."""
         try:
             recs = [
                 r for r in self.image_to_image_search(image_path, limit=limit * 2)
@@ -148,6 +162,8 @@ class SearchEngine:
         self, reference_image_path: str, similarity_threshold: float = 0.8,
         limit: Optional[int] = None,
     ) -> List[Dict[str, Any]]:
+        """Searches for images exceeding a given similarity threshold
+        relative to a reference image."""
         try:
             emb = self.embedding_manager.get_image_embedding(reference_image_path, "clip")
             results = self.vector_db.search(emb, k=limit or self.max_results)
@@ -157,9 +173,12 @@ class SearchEngine:
             return []
 
     def get_search_stats(self) -> Dict[str, Any]:
+        """Retrieves aggregated search statistics and vector database metrics."""
         return get_search_stats(self.vector_db)
 
     def _hybrid_score(self, scores: Dict[str, float]) -> float:
+        """Computes a weighted average of individual search scores using
+        the configured hybrid weight distribution."""
         total_s = total_w = 0.0
         for stype, weight in self.hybrid_weights.items():
             if stype in scores:
@@ -168,6 +187,8 @@ class SearchEngine:
         return total_s / total_w if total_w > 0 else 0.0
 
     def _expand_query(self, query: str) -> List[str]:
+        """Expands a query into alternative phrasings by substituting
+        known synonyms for common shoe-related terms."""
         exp = [query]
         q = query.lower()
         if "shoe" in q:
@@ -180,4 +201,6 @@ class SearchEngine:
 
 
 def create_search_engine(vector_backend: str = "faiss") -> SearchEngine:
+    """Creates and returns a SearchEngine instance configured with the
+    specified vector database backend."""
     return SearchEngine(vector_backend=vector_backend)

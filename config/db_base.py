@@ -17,10 +17,16 @@ Base = declarative_base()
 
 
 def _utcnow():
+    """Returns the current UTC datetime as a timezone-aware object.
+    Serves as the default timestamp factory for model columns.
+    """
     return datetime.now(timezone.utc)
 
 
 def get_db():
+    """Yields a SQLAlchemy database session for dependency injection.
+    Ensures the session is properly closed after use.
+    """
     db = SessionLocal()
     try:
         yield db
@@ -30,6 +36,9 @@ def get_db():
 
 @contextmanager
 def get_db_session():
+    """Provides a transactional database session as a context manager.
+    Commits on success, rolls back on exception, and always closes the session.
+    """
     db = SessionLocal()
     try:
         yield db

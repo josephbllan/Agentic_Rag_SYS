@@ -6,11 +6,17 @@ from .subject import Subject
 
 class PerformanceEventObserver(Observer):
     def __init__(self):
+        """Initializes the performance observer with an empty execution times list
+        and a configurable maximum sample size.
+        """
         self._logger = logging.getLogger(self.__class__.__name__)
         self._execution_times: List[float] = []
         self._max_samples = 1000
 
     def update(self, subject: Subject, event_type: str, data: Dict[str, Any]) -> None:
+        """Records operation execution times and logs warnings for slow operations
+        exceeding the five-second threshold.
+        """
         if event_type == "operation_completed":
             t = data.get("execution_time", 0.0)
             self._execution_times.append(t)
@@ -21,10 +27,12 @@ class PerformanceEventObserver(Observer):
 
     @property
     def avg_execution_time(self) -> float:
+        """Calculates and returns the average execution time across all recorded samples."""
         return sum(self._execution_times) / len(self._execution_times) if self._execution_times else 0.0
 
     @property
     def stats(self) -> Dict[str, Any]:
+        """Returns statistics including count, average, min, and max execution times."""
         if not self._execution_times:
             return {"count": 0, "avg": 0.0, "min": 0.0, "max": 0.0}
         return {"count": len(self._execution_times), "avg": self.avg_execution_time, "min": min(self._execution_times), "max": max(self._execution_times)}

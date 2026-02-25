@@ -77,6 +77,8 @@ BRAND_ALIASES: Dict[str, str] = {
 
 
 def extract_image_path(query: str) -> Optional[str]:
+    """Extracts an image file path from the query string by matching
+    common image file extensions, returning None if none is found."""
     path_patterns = [
         r"image\s+([^\s]+\.(jpg|jpeg|png|bmp|tiff))",
         r"file\s+([^\s]+\.(jpg|jpeg|png|bmp|tiff))",
@@ -90,6 +92,8 @@ def extract_image_path(query: str) -> Optional[str]:
 
 
 def extract_similarity_threshold(query: str) -> float:
+    """Determines a similarity threshold from natural language cues in the
+    query, defaulting to 0.7 when no specific phrasing is detected."""
     if "very similar" in query or "exact match" in query:
         return 0.9
     if "similar" in query or "like" in query:
@@ -100,6 +104,8 @@ def extract_similarity_threshold(query: str) -> float:
 
 
 def extract_limit(query: str) -> int:
+    """Parses the desired result count from the query by recognizing
+    number words and digit patterns, defaulting to 10."""
     number_words = {
         "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
         "ten": 10, "twenty": 20, "fifty": 50, "hundred": 100,
@@ -119,6 +125,8 @@ _MALICIOUS_PATTERNS = [
 
 
 def validate_query(query: str) -> Tuple[bool, str]:
+    """Validates a search query for length constraints and potentially
+    malicious content, returning a boolean and a status message."""
     if not query or len(query.strip()) < 2:
         return False, "Query too short"
     if len(query) > 500:

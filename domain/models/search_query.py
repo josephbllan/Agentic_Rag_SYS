@@ -17,6 +17,9 @@ class SearchQuery(BaseModel):
 
     @validator('query')
     def sanitize_query(cls, v: str) -> str:
+        """Sanitizes the query string by rejecting potentially malicious content
+        and stripping leading/trailing whitespace.
+        """
         malicious_patterns = [
             r'<script', r'javascript:', r'on\w+=',
             r'eval\(', r'exec\(',
@@ -28,6 +31,7 @@ class SearchQuery(BaseModel):
 
     @validator('image_path')
     def validate_image_path(cls, v: Optional[str]) -> Optional[str]:
+        """Validates the image path, rejecting empty values and path traversal attempts."""
         if v is not None:
             if not v or '..' in v:
                 raise ValueError('Invalid image path')

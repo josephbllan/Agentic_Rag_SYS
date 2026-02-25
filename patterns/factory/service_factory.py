@@ -9,10 +9,14 @@ class ServiceFactory:
 
     @classmethod
     def register_service(cls, service_name: str, service_class: Type) -> None:
+        """Registers a service class under the given service name identifier."""
         cls._service_classes[service_name] = service_class
 
     @classmethod
     def create_service(cls, service_name: str, cached: bool = True, **kwargs) -> Any:
+        """Creates and returns a service instance, optionally caching it for reuse.
+        Returns the cached instance if one exists and caching is enabled.
+        """
         if cached and service_name in cls._service_instances:
             return cls._service_instances[service_name]
         if service_name not in cls._service_classes:
@@ -24,8 +28,10 @@ class ServiceFactory:
 
     @classmethod
     def get_service(cls, service_name: str) -> Optional[Any]:
+        """Retrieves a previously cached service instance by name, or None if not found."""
         return cls._service_instances.get(service_name)
 
     @classmethod
     def clear_cache(cls) -> None:
+        """Clears all cached service instances from the factory."""
         cls._service_instances.clear()

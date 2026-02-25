@@ -18,6 +18,9 @@ router = APIRouter()
 
 @router.post("/login", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    """Authenticates a user with username and password credentials
+    and returns a bearer access token on success.
+    """
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(status_code=401, detail="Incorrect username or password")
@@ -36,6 +39,9 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 async def get_current_user_info(
     current_user: User = Depends(get_current_active_user),
 ):
+    """Returns profile information for the currently authenticated user
+    including username, email, full name, and assigned roles.
+    """
     return UserResponse(
         username=current_user.username,
         email=current_user.email,
@@ -49,5 +55,8 @@ async def logout(
     token: str = Depends(oauth2_scheme),
     current_user: User = Depends(get_current_active_user),
 ):
+    """Logs out the current user by revoking their access token
+    and adding it to the in-memory blacklist.
+    """
     blacklist.revoke(token)
     return {"message": f"User {current_user.username} logged out successfully"}

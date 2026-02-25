@@ -39,4 +39,7 @@ class ShoeImage(Base):
     last_searched = Column(DateTime)
 
     def __repr__(self):
+        """Returns a string representation of the ShoeImage instance.
+        Displays the image ID, filename, and brand for quick identification.
+        """
         return f"<ShoeImage(id={self.id}, filename='{self.filename}', brand='{self.brand}')>"

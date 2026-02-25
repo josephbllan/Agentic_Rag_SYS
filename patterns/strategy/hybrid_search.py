@@ -6,10 +6,16 @@ from domain.base_classes import BaseSearchStrategy
 
 class HybridSearchStrategy(BaseSearchStrategy):
     def __init__(self, weights: Optional[Dict[str, float]] = None):
+        """Initializes the hybrid search strategy with configurable score weights
+        for visual, text, and metadata components.
+        """
         super().__init__(name="hybrid_search")
         self._weights = weights or {"visual": 0.4, "text": 0.3, "metadata": 0.3}
 
     def execute(self, query: SearchQuery, context: Dict[str, Any]) -> List[SearchResultItem]:
+        """Executes a hybrid search combining visual, text, and metadata results
+        into a single ranked list using weighted scoring.
+        """
         em = context.get("embedding_manager")
         vdb = context.get("vector_db")
         if not em or not vdb:
@@ -40,6 +46,7 @@ class HybridSearchStrategy(BaseSearchStrategy):
         return final
 
     def _calculate_hybrid_score(self, scores: Dict[str, float]) -> float:
+        """Calculates a weighted average score from multiple search result score types."""
         total_s = total_w = 0.0
         for stype, weight in self._weights.items():
             if stype in scores:
@@ -48,6 +55,7 @@ class HybridSearchStrategy(BaseSearchStrategy):
         return total_s / total_w if total_w > 0 else 0.0
 
     def validate_query(self, query: SearchQuery) -> tuple[bool, str]:
+        """Validates that the query contains at least a text query or a valid image path."""
         if not query.query and not query.image_path:
             return False, "Either text query or image path is required"
         if query.image_path and not os.path.exists(query.image_path):

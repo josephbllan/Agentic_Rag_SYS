@@ -13,6 +13,9 @@ class EmbeddingResult:
     processing_time: float = 0.0
 
     def __post_init__(self):
+        """Validates that the vector length matches the declared dimension
+        and that the processing time is non-negative.
+        """
         if self.dimension != len(self.vector):
             raise ValueError(f"Dimension mismatch: expected {self.dimension}, got {len(self.vector)}")
         if self.processing_time < 0:

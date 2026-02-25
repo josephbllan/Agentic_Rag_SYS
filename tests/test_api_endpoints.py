@@ -35,6 +35,7 @@ _mock_search_engine.vector_db.get_stats.return_value = {"total_vectors": 0}
 
 
 def _override_search_engine():
+    """Returns the shared mock search engine for dependency injection."""
     return _mock_search_engine
 
 
@@ -43,22 +44,26 @@ app.dependency_overrides[get_search_engine] = _override_search_engine
 
 @pytest.fixture
 def client():
+    """Provides a FastAPI TestClient instance for making HTTP requests."""
     return TestClient(app)
 
 
 @pytest.fixture
 def auth_headers():
+    """Creates an Authorization header dict with an admin-level JWT token."""
     token = create_access_token({"sub": "admin", "roles": ["admin", "user"]})
     return {"Authorization": f"Bearer {token}"}
 
 
 @pytest.fixture
 def auth_token():
+    """Generates a raw admin JWT token string for use in tests."""
     return create_access_token({"sub": "admin", "roles": ["admin", "user"]})
 
 
 @pytest.fixture
 def user_headers():
+    """Creates an Authorization header dict with a regular-user JWT token."""
     token = create_access_token({"sub": "demo", "roles": ["user"]})
     return {"Authorization": f"Bearer {token}"}
 
@@ -68,6 +73,7 @@ def user_headers():
 # ---------------------------------------------------------------------------
 class TestHealthEndpoint:
     def test_health_returns_200(self, client):
+        """Asserts that the public health endpoint responds with HTTP 200."""
         resp = client.get("/api/v1/health")
         assert resp.status_code == 200
 
@@ -77,6 +83,7 @@ class TestHealthEndpoint:
 # ---------------------------------------------------------------------------
 class TestAuthEndpoints:
     def test_login_success(self, client):
+        """Verifies that a correct login returns a 200 with an access token."""
         resp = client.post(
             "/api/v1/auth/login",
             data={"username": "admin", "password": "secret"},
@@ -87,6 +94,7 @@ class TestAuthEndpoints:
         assert body["token_type"] == "bearer"
 
     def test_login_failure(self, client):
+        """Verifies that invalid credentials result in an HTTP 401 response."""
         resp = client.post(
             "/api/v1/auth/login",
             data={"username": "admin", "password": "wrong"},
@@ -94,10 +102,12 @@ class TestAuthEndpoints:
         assert resp.status_code == 401
 
     def test_me_requires_auth(self, client):
+        """Confirms that the /me endpoint returns 401 without a token."""
         resp = client.get("/api/v1/auth/me")
         assert resp.status_code == 401
 
     def test_me_with_token(self, client, auth_headers):
+        """Checks that an authenticated request to /me returns the current user."""
         resp = client.get("/api/v1/auth/me", headers=auth_headers)
         assert resp.status_code == 200
         assert resp.json()["username"] == "admin"
@@ -108,6 +118,7 @@ class TestAuthEndpoints:
 # ---------------------------------------------------------------------------
 class TestLogout:
     def test_logout_revokes_token(self, client, auth_token):
+        """Verifies that logging out blacklists the token, blocking further requests."""
         headers = {"Authorization": f"Bearer {auth_token}"}
         resp = client.post("/api/v1/auth/logout", headers=headers)
         assert resp.status_code == 200
@@ -123,10 +134,12 @@ class TestLogout:
 # ---------------------------------------------------------------------------
 class TestSearchEndpoints:
     def test_text_search_requires_auth(self, client):
+        """Asserts that the text search endpoint rejects unauthenticated requests."""
         resp = client.post("/api/v1/search/text", json={"query": "shoes"})
         assert resp.status_code == 401
 
     def test_text_search_with_auth(self, client, auth_headers):
+        """Verifies that an authenticated text search returns a successful response."""
         resp = client.post(
             "/api/v1/search/text",
             json={"query": "red nike shoes", "limit": 5},
@@ -137,10 +150,12 @@ class TestSearchEndpoints:
         assert body["success"] is True
 
     def test_image_search_requires_auth(self, client):
+        """Asserts that the image search endpoint rejects unauthenticated requests."""
         resp = client.post("/api/v1/search/image", json={"image_path": "test.jpg"})
         assert resp.status_code == 401
 
     def test_hybrid_search_requires_auth(self, client):
+        """Asserts that the hybrid search endpoint rejects unauthenticated requests."""
         resp = client.post("/api/v1/search/hybrid", json={"query": "shoes"})
         assert resp.status_code == 401
 
@@ -150,17 +165,21 @@ class TestSearchEndpoints:
 # ---------------------------------------------------------------------------
 class TestSystemEndpoints:
     def test_system_status_requires_auth(self, client):
+        """Asserts that the system status endpoint rejects unauthenticated requests."""
         resp = client.get("/api/v1/system/status")
         assert resp.status_code == 401
 
     def test_system_status_with_auth(self, client, auth_headers):
+        """Verifies that an authenticated admin can retrieve system status."""
         resp = client.get("/api/v1/system/status", headers=auth_headers)
         assert resp.status_code == 200
 
     def test_rebuild_requires_admin(self, client, user_headers):
+        """Confirms that a non-admin user receives 403 when attempting a rebuild."""
         resp = client.post("/api/v1/system/rebuild-index", headers=user_headers)
         assert resp.status_code == 403
 
     def test_rebuild_with_admin(self, client, auth_headers):
+        """Verifies that an admin user can trigger an index rebuild successfully."""
         resp = client.post("/api/v1/system/rebuild-index", headers=auth_headers)
         assert resp.status_code == 200

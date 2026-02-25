@@ -14,6 +14,9 @@ from config.settings import APP_VERSION
 class HealthController(BaseController):
 
     def __init__(self):
+        """Initializes the health controller with no backing service,
+        as health checks rely on system introspection rather than a domain service.
+        """
         super().__init__(service=None)
 
     async def check_health(self) -> Dict[str, Any]:

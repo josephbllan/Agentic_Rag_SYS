@@ -11,6 +11,8 @@ class EmbeddingManager:
     """Manage and cache embeddings."""
 
     def __init__(self, cache_dir: str = "embeddings_cache"):
+        """Initializes the embedding manager with a cache directory
+        and a multimodal embedder instance."""
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(exist_ok=True)
         self.multimodal_embedder = MultiModalEmbedder()
@@ -18,6 +20,8 @@ class EmbeddingManager:
     def get_image_embedding(
         self, image_path: str, model_type: str = "clip", use_cache: bool = True
     ) -> np.ndarray:
+        """Generates an image embedding using the specified model, returning
+        a cached result when available and caching is enabled."""
         if use_cache:
             cache_path = self.cache_dir / f"{Path(image_path).stem}_{model_type}.npy"
             if cache_path.exists():
@@ -36,6 +40,8 @@ class EmbeddingManager:
         self, text: str, model_type: str = "sentence_transformer",
         use_cache: bool = True,
     ) -> np.ndarray:
+        """Generates a text embedding using the specified model, returning
+        a cached result when available and caching is enabled."""
         if use_cache:
             cache_key = f"{stable_text_hash(text)}_{model_type}"
             cache_path = self.cache_dir / f"text_{cache_key}.npy"
@@ -54,6 +60,8 @@ class EmbeddingManager:
     def batch_process_images(
         self, image_paths: List[str], model_type: str = "clip"
     ) -> List[np.ndarray]:
+        """Processes a list of image paths in batch and returns their
+        embedding vectors using the specified model type."""
         if model_type == "clip":
             embedder = self.multimodal_embedder.image_embedder
         elif model_type == "resnet":
@@ -65,6 +73,8 @@ class EmbeddingManager:
     def batch_process_texts(
         self, texts: List[str], model_type: str = "sentence_transformer"
     ) -> List[np.ndarray]:
+        """Processes a list of text strings in batch and returns their
+        embedding vectors using the specified model type."""
         if model_type == "clip":
             embedder = self.multimodal_embedder.clip_embedder
         elif model_type == "sentence_transformer":
@@ -74,6 +84,8 @@ class EmbeddingManager:
         return embedder.encode_texts_batch(texts)
 
     def clear_cache(self):
+        """Removes all cached embedding files by deleting and recreating
+        the cache directory."""
         import shutil
         if self.cache_dir.exists():
             shutil.rmtree(self.cache_dir)
@@ -81,19 +93,26 @@ class EmbeddingManager:
 
 
 def normalize_embedding(embedding: np.ndarray) -> np.ndarray:
+    """Normalizes an embedding vector to unit length, returning the original
+    unchanged if its norm is zero."""
     norm = np.linalg.norm(embedding)
     return embedding / norm if norm > 0 else embedding
 
 
 def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
+    """Computes the cosine similarity between two embedding vectors
+    by taking the dot product of their normalized forms."""
     return float(np.dot(normalize_embedding(a), normalize_embedding(b)))
 
 
 def euclidean_distance(a: np.ndarray, b: np.ndarray) -> float:
+    """Computes the Euclidean distance between two embedding vectors."""
     return float(np.linalg.norm(a - b))
 
 
 def create_embedding_from_metadata(metadata: Dict[str, Any]) -> np.ndarray:
+    """Creates a one-hot encoded feature vector from metadata categories
+    such as pattern, shape, size, and brand."""
     features: List[int] = []
     for cat, vals in [
         ("pattern", ["zigzag", "circular", "square", "diamond", "brand_logo", "other"]),

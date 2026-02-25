@@ -12,6 +12,9 @@ logger = logging.getLogger(__name__)
 
 class RequestIDMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+        """Assigns a unique request ID from the incoming header or generates
+        a new UUID, then propagates it through request state and response headers.
+        """
         request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
         request.state.request_id = request_id
 
@@ -21,5 +24,8 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
 
 
 def setup_request_id_middleware(app: FastAPI) -> None:
+    """Registers the request-ID middleware on the FastAPI application
+    so every request receives a traceable unique identifier.
+    """
     app.add_middleware(RequestIDMiddleware)
     logger.info("Request-ID middleware configured")

@@ -11,6 +11,7 @@ class IndexingResult(BaseModel):
 
     @validator('successful', 'failed')
     def validate_counts(cls, v: int, values: Dict[str, Any]) -> int:
+        """Validates that success and failure counts do not exceed the total processed count."""
         if 'total_processed' in values:
             if v > values['total_processed']:
                 raise ValueError('Count cannot exceed total processed')

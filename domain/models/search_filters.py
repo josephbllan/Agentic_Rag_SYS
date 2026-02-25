@@ -14,6 +14,7 @@ class SearchFilters(BaseModel):
     max_results: Optional[int] = Field(None, gt=0, le=1000)
 
     def to_dict(self) -> Dict[str, Any]:
+        """Converts the filters to a dictionary, excluding any fields set to None."""
         return {k: v for k, v in self.dict().items() if v is not None}
 
     class Config:

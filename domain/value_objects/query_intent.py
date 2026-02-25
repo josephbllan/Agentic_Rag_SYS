@@ -14,6 +14,7 @@ class QueryIntent:
     confidence: float = 1.0
 
     def __post_init__(self):
+        """Validates that thresholds, limits, and confidence are within their allowed ranges."""
         if not 0.0 <= self.similarity_threshold <= 1.0:
             raise ValueError("similarity_threshold must be between 0 and 1")
         if self.limit < 1:
@@ -22,6 +23,7 @@ class QueryIntent:
             raise ValueError("confidence must be between 0 and 1")
 
     def to_dict(self) -> Dict[str, Any]:
+        """Converts the query intent into a plain dictionary representation."""
         return {
             "query_type": self.query_type.value,
             "search_terms": self.search_terms,

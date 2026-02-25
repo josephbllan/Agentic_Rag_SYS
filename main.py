@@ -18,6 +18,9 @@ logger = logging.getLogger(__name__)
 
 
 def main():
+    """Parses CLI arguments and dispatches the requested mode
+    (index, search, stats, or serve) for the RAG system.
+    """
     parser = argparse.ArgumentParser(description="RAG System for Shoe Image Search")
     parser.add_argument("--mode", choices=["index", "search", "serve", "stats"], default="serve")
     parser.add_argument("--query", type=str)
@@ -53,10 +56,12 @@ def main():
             import threading
 
             def start_web():
+                """Starts the Flask web interface on localhost port 5000."""
                 from web.app import app
                 app.run(host="127.0.0.1", port=5000, debug=False, use_reloader=False)
 
             def start_api():
+                """Starts the FastAPI REST API server on port 8000 via uvicorn."""
                 import uvicorn
                 from api.main import app as api_app
                 uvicorn.run(api_app, host="0.0.0.0", port=8000, log_level="info")

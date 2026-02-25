@@ -117,5 +117,8 @@ class BaseController:
         }
     
     def __repr__(self) -> str:
+        """Returns a string representation of the controller instance
+        including its class name and associated service.
+        """
         return f"{self.__class__.__name__}(service={self._service})"
 
