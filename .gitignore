@@ -52,3 +52,5 @@ htmlcov/
 
 # Local-only docs
 Software_Engineering_principles_used.md
+CHANGELOG.md
+DIRECTORY_STRUCTURE_GUIDE.md
